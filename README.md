@@ -57,4 +57,4 @@ This project is licensed under the GNU General Public License v3.0 - see the [LI
 ## Contact Me
 There are two ways that you can contact me:
 *   Discord: 'ultamanium'
-*   GitHub Discussions and Issues: https://github.com/original6001/Original-Macro/discussions 
+*   GitHub Discussions and Issues: https://github.com/original6001/Original-Macro/issues 
