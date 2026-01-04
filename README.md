@@ -8,7 +8,7 @@ This application includes several features to enhance your workflow:
 
 ### 1. Autoclicker
 *   **Adjustable Speeds:** Choose between 10, 15, 20, or 100 CPS (Clicks Per Second).
-*   **Custom Activation:** Record a specific key to start the autoclicker whenever it's needed.
+*   **Custom Activation:** Record a specific key to start the autoclicker whenever it's executed.
 *   **Quick Stop:** Press the `c` key to stop clicking immediately.
 
 ### 2. Custom Macro Recorder
@@ -18,10 +18,10 @@ This application includes several features to enhance your workflow:
 *   **Easy Controls:** Start recording with a button and stop it by pressing the `/` (slash) key.
 
 ### 3. Advanced Features
-*   **High-Precision Mode:** The app utilizes the Windows timer with 1ms precision during macro recording for maximum accuracy.
+*   **High-Precision Mode:** The app utilizes the Windows timer with 1 ms precision during macro recording for maximum accuracy.
 *   **Global Hotkeys:**
     *   `Esc`: Completely exits the application.
-    *   `c`: Stops the autoclicker.
+    *   `c`: Stops the autoclicker or the current macro playback.
     *   `/`: Stops macro recording.
 
 ## How to use it
@@ -52,7 +52,7 @@ pip install keyboard mouse pydirectinput
 
 ## License
 
-This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the GNU General Public License v3.0, see the [LICENSE](LICENSE) file for details.
 
 ## Contact Me
 There are two ways that you can contact me:

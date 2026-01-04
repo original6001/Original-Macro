@@ -293,6 +293,9 @@ def playback_macro():
             else:
                 mouse.play([event])
 
+            if keyboard.is_pressed('c'):
+                break
+
     finally:
         is_playing_macro = False
 
