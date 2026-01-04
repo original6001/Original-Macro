@@ -52,4 +52,9 @@ pip install keyboard mouse pydirectinput
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
+
+## Contact Me
+There are two ways that you can contact me:
+*   Discord: 'ultamanium'
+*   GitHub Discussions and Issues: https://github.com/original6001/Original-Macro/discussions 

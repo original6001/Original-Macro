@@ -1,3 +1,23 @@
+#    Original Macro
+#    Copyright (C) 2026 original6001
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+#    For inquiries, contact 'ultamanium' on Discord or open a discussion
+#    or issue on GitHub.
+
+
 import configparser
 import ctypes
 import os
@@ -303,7 +323,8 @@ mcbox = ttk.Combobox(mframe, values=["10 CPS", "15 CPS", "20 CPS", "100 CPS"], s
 mcbox.grid(row=2, column=1, padx=10)
 
 mbutton2 = ttk.Button(mframe, text="Start on:",
-                      command=lambda: threading.Thread(target=start_on, daemon=True, args=("Autoclicker", "mbutton2",)).start())
+                      command=lambda: threading.Thread(target=start_on, daemon=True,
+                                                       args=("Autoclicker", "mbutton2",)).start())
 mbutton2.grid(row=3, column=0, pady=10)
 
 mbutton3 = ttk.Button(mframe, text="Record",
@@ -323,7 +344,8 @@ mbutton5 = ttk.Button(mframe2, text="Record Macro - '/' to stop.",
 mbutton5.grid(row=2, column=1)
 
 mbutton6 = ttk.Button(mframe2, text="Start on:",
-                      command=lambda: threading.Thread(target=start_on, daemon=True, args=("Custom Macro", "mbutton6")).start())
+                      command=lambda: threading.Thread(target=start_on, daemon=True,
+                                                       args=("Custom Macro", "mbutton6")).start())
 mbutton6.grid(row=3, column=0, pady=10)
 
 mbutton7 = ttk.Button(mframe2, text="Record",
