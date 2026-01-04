@@ -14,7 +14,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-#    For inquiries, contact 'ultamanium' on Discord or open an issue
+#    For questions/inquiries, contact 'ultamanium' on Discord or open an issue
 #    on GitHub.
 
 
@@ -78,6 +78,9 @@ msaveslot.set("1")
 
 mloadslot = tk.StringVar(root)
 mloadslot.set("1")
+
+mclearslot = tk.StringVar(root)
+mclearslot.set("1")
 
 
 def set_high_precision(enable):
@@ -303,7 +306,8 @@ def playback_macro():
 def save_cmacro():
     global recorded_events, msaveslot
 
-    slot = msaveslot.get()
+    slot_val = msaveslot.get()
+    slot = slot_val.split(" ")[0]
 
     if not config.has_section("MACRODATA"):
         config.add_section("MACRODATA")
@@ -318,7 +322,8 @@ def save_cmacro():
 def load_cmacro():
     global recorded_events, mloadslot
 
-    slot = mloadslot.get()
+    slot_val = mloadslot.get()
+    slot = slot_val.split(" ")[0]
     try:
         serialized_data = config.get("MACRODATA", "recordsaveslot" + slot)
         recorded_events = pickle.loads(bytes.fromhex(serialized_data))
@@ -326,6 +331,71 @@ def load_cmacro():
     except Exception as e:
         print(f"Error loading slot {slot}: {e}")
         recorded_events = []
+
+
+def check_cmacrodata():
+    if not config.has_section("MACRODATA"):
+        config.add_section("MACRODATA")
+
+    while True:
+        new_values = []
+        for i in range(1, 4):
+            slot_name = f"recordsaveslot{i}"
+            if config.has_option("MACRODATA", slot_name) and config.get("MACRODATA", slot_name).strip():
+                new_values.append(f"{i} (Full)")
+            else:
+                new_values.append(f"{i} (Empty)")
+
+        mcbox2["values"] = new_values
+        mcbox3["values"] = new_values
+        mcbox4["values"] = new_values
+
+        curr_save = msaveslot.get()
+        if curr_save.isdigit():
+            idx = int(curr_save) - 1
+            if 0 <= idx < len(new_values):
+                msaveslot.set(new_values[idx])
+
+        elif "(" in curr_save:
+            slot_num = curr_save.split(" ")[0]
+            idx = int(slot_num) - 1
+            if 0 <= idx < len(new_values) and curr_save != new_values[idx]:
+                msaveslot.set(new_values[idx])
+
+        curr_load = mloadslot.get()
+        if curr_load.isdigit():
+            idx = int(curr_load) - 1
+            if 0 <= idx < len(new_values):
+                mloadslot.set(new_values[idx])
+
+        elif "(" in curr_load:
+            slot_num = curr_load.split(" ")[0]
+            idx = int(slot_num) - 1
+            if 0 <= idx < len(new_values) and curr_load != new_values[idx]:
+                mloadslot.set(new_values[idx])
+
+        curr_load = mclearslot.get()
+        if curr_load.isdigit():
+            idx = int(curr_load) - 1
+            if 0 <= idx < len(new_values):
+                mclearslot.set(new_values[idx])
+
+        elif "(" in curr_load:
+            slot_num = curr_load.split(" ")[0]
+            idx = int(slot_num) - 1
+            if 0 <= idx < len(new_values) and curr_load != new_values[idx]:
+                mclearslot.set(new_values[idx])
+
+        time.sleep(0.5)
+
+
+def clear_slot():
+    slot_val = mclearslot.get()
+    slot = slot_val.split(" ")[0]
+    config.set("MACRODATA", f"recordsaveslot{slot}", "")
+
+    with open("config.ini", "w") as f:
+        config.write(f)
 
 
 notebook = ttk.Notebook(root)
@@ -339,10 +409,10 @@ notebook.add(tab_admacro, text="Advanced Macro")
 
 # macro tab
 mframe = ttk.Frame(tab_macro, padding=20, relief="groove", borderwidth=5)
-mframe.grid(row=1, column=0)
+mframe.grid(row=1, column=0, pady=5)
 
 mframe2 = ttk.Frame(tab_macro, padding=20, relief="groove", borderwidth=5)
-mframe2.grid(row=2, column=0)
+mframe2.grid(row=2, column=0, pady=10, padx=10)
 
 # frame 1
 mlabel2 = ttk.Label(mframe, text="Autoclicker", font=("Calibri", 17))
@@ -389,14 +459,21 @@ mbutton7.grid(row=3, column=1)
 mbutton8 = ttk.Button(mframe2, text="Save as slot:", command=save_cmacro)
 mbutton8.grid(row=4, column=0, pady=10)
 
-mcbox2 = ttk.Combobox(mframe2, values=["1", "2", "3"], state="readonly", textvariable=msaveslot)
+mcbox2 = ttk.Combobox(mframe2, values=["1 (Empty)", "2 (Empty)", "3 (Empty)"], state="readonly", textvariable=msaveslot)
 mcbox2.grid(row=4, column=1, padx=10)
 
 mbutton9 = ttk.Button(mframe2, text="Load slot:", command=load_cmacro)
 mbutton9.grid(row=5, column=0, pady=10)
 
-mcbox3 = ttk.Combobox(mframe2, values=["1", "2", "3"], state="readonly", textvariable=mloadslot)
+mcbox3 = ttk.Combobox(mframe2, values=["1 (Empty)", "2 (Empty)", "3 (Empty)"], state="readonly", textvariable=mloadslot)
 mcbox3.grid(row=5, column=1, padx=10)
 
+mbutton10 = ttk.Button(mframe2, text="Clear slot:", command=clear_slot)
+mbutton10.grid(row=6, column=0, pady=10)
+
+mcbox4 = ttk.Combobox(mframe2, values=["1 (Empty)", "2 (Empty)", "3 (Empty)"], state="readonly", textvariable=mclearslot)
+mcbox4.grid(row=6, column=1, padx=10)
+
+threading.Thread(target=check_cmacrodata, daemon=True).start()
 threading.Thread(target=exit_listener, daemon=True).start()
 root.mainloop()
