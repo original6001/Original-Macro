@@ -19,7 +19,13 @@ This application includes several features to enhance your workflow:
 *   **Custom Activation:** Record a specific key to start the macro playback whenever it's executed.
 *   **Save to File:** Save macros to a `.ini` file for later playback. Has capabilities to load, save and clear.
 
-### 3. Advanced Features
+### 3. Advanced Macro Builder
+*   **Manual Creation:** Build a macro step-by-step by adding specific keybinds and delays.
+*   **Visual Sequence:** View your current macro sequence directly in the application.
+*   **Management:** Save, load, and clear advanced macros using dedicated slots.
+*   **Quick Correction:** Use the "Backspace" button to remove the last action from your sequence.
+
+### 4. Advanced Features
 *   **High-Precision Mode:** The app utilizes the Windows timer with 1 ms precision during macro recording for maximum accuracy.
 *   **Global Hotkeys:**
     *   `Esc`: Completely exits the application.
@@ -38,6 +44,14 @@ This application includes several features to enhance your workflow:
     *   Perform the actions you wish to save.
     *   Press `/` to finish recording.
     *   Play back the macro by clicking "Playback Macro" or by binding it to a "Start on:" key.
+
+4.  **Using the Advanced Macro Builder:**
+    *   Go to the "Advanced Macro" tab.
+    *   Click "Record" next to "Add Keybind:", press a key, and then click "Add Keybind:" to add it to the sequence.
+    *   Enter a delay in seconds and click "Add Delay (s):" to insert a pause.
+    *   Use "Backspace" to remove the last entry.
+    *   Click "Run Macro" to execute the sequence.
+    *   Save and Load your custom sequences using the slots provided.
 
 ## Requirements
 
