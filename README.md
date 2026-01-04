@@ -1,6 +1,6 @@
 # Original Macro
 
-The "Original Macro" application is a powerful tool designed to automate mouse clicks and record complex keyboard/mouse sequences with high precision. It is built to provide a smooth, lag-free experience for all your automation needs.
+The "Original Macro" application is a powerful macro designed to automate mouse clicks and record complex keyboard/mouse sequences with high precision. It is built to provide a smooth, lag-free experience for all your automation needs.
 
 ## Features
 
