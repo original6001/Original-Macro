@@ -87,6 +87,15 @@ mclearslot.set("1")
 advmacrovar = tk.StringVar(root)
 advmacrovar.set("Empty")
 
+advsaveslot = tk.StringVar(root)
+advsaveslot.set("1")
+
+advloadslot = tk.StringVar(root)
+advloadslot.set("1")
+
+advclearslot = tk.StringVar(root)
+advclearslot.set("1")
+
 
 def set_high_precision(enable):
     if enable:
@@ -340,7 +349,7 @@ def save_cmacro():
 
 
 def load_cmacro():
-    global recorded_events, mloadslot
+    global recorded_events
 
     slot_val = mloadslot.get()
     slot = slot_val.split(" ")[0]
@@ -484,6 +493,47 @@ def backspace():
     root.update()
 
 
+def save_advmacro():
+    global advmacro
+
+    if not advmacro:
+        return
+
+    slot = advsaveslot.get()
+
+    serialized_data = pickle.dumps(advmacro).hex()
+    config.set("MACRODATA", "advancedsaveslot" + slot, serialized_data)
+
+    with open("config.ini", "w") as f:
+        config.write(f)
+
+
+def load_advmacro():
+    global advmacro
+
+    slot = advloadslot.get()
+
+    try:
+        serialized_data = config.get("MACRODATA", "advancedsaveslot" + slot)
+        advmacro = pickle.loads(bytes.fromhex(serialized_data))
+
+    except Exception as e:
+        print(f"Error loading slot {slot}: {e}")
+        advmacro = []
+
+    advmacrovar.set("\n".join(advmacro))
+    root.update()
+
+
+def clear_advslot():
+    slot = advclearslot.get()
+
+    config.set("MACRODATA", f"advancedsaveslot{slot}", "")
+
+    with open("config.ini", "w") as f:
+        config.write(f)
+
+
 notebook = ttk.Notebook(root)
 notebook.pack(fill="both", expand=True)
 
@@ -568,9 +618,13 @@ amlabel.grid(row=0, column=3, padx=50)
 amframe = ttk.Frame(tab_admacro, padding=20, relief="groove", borderwidth=5)
 amframe.grid(row=1, column=0, pady=10)
 
+amframe2 = ttk.Frame(tab_admacro, padding=20, relief="groove", borderwidth=5)
+amframe2.grid(row=2, column=0, pady=10)
+
 amlabel2 = ttk.Label(tab_admacro, textvariable=advmacrovar, font=("Calibri", 10))
 amlabel2.grid(row=1, column=3)
 
+# frame 1
 ambutton = ttk.Button(amframe, text="Add Keybind:", command=add_keybind)
 ambutton.grid(row=0, column=0, pady=10)
 
@@ -590,6 +644,25 @@ ambutton4.grid(row=2, column=0, pady=10)
 
 ambutton5 = ttk.Button(amframe, text="Backspace", command=backspace)
 ambutton5.grid(row=2, column=1, padx=10)
+
+# frame 2
+ambutton6 = ttk.Button(amframe2, text="Save as slot:", command=save_advmacro)
+ambutton6.grid(row=0, column=0, pady=10)
+
+amcbox = ttk.Combobox(amframe2, values=["1", "2", "3"], state="readonly", textvariable=advsaveslot)
+amcbox.grid(row=0, column=1, padx=10)
+
+ambutton7 = ttk.Button(amframe2, text="Load slot:", command=load_advmacro)
+ambutton7.grid(row=1, column=0, pady=10)
+
+amcbox2 = ttk.Combobox(amframe2, values=["1", "2", "3"], state="readonly", textvariable=advloadslot)
+amcbox2.grid(row=1, column=1, padx=10)
+
+ambutton8 = ttk.Button(amframe2, text="Clear slot:", command=clear_advslot)
+ambutton8.grid(row=2, column=0, pady=10)
+
+amcbox3 = ttk.Combobox(amframe2, values=["1", "2", "3"], state="readonly", textvariable=advclearslot)
+amcbox3.grid(row=2, column=1, padx=10)
 
 threading.Thread(target=check_cmacrodata, daemon=True).start()
 threading.Thread(target=exit_listener, daemon=True).start()
