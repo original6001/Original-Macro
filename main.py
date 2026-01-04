@@ -14,13 +14,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-#    For inquiries, contact 'ultamanium' on Discord or open a discussion
-#    or issue on GitHub.
+#    For inquiries, contact 'ultamanium' on Discord or open an issue
+#    on GitHub.
 
 
 import configparser
 import ctypes
 import os
+import pickle
 import threading
 import time
 import tkinter as tk
@@ -71,6 +72,12 @@ style.configure("TCombobox", background="#1f1732", foreground="black")
 
 clickspeed = tk.StringVar(root)
 clickspeed.set("10 CPS")
+
+msaveslot = tk.StringVar(root)
+msaveslot.set("1")
+
+mloadslot = tk.StringVar(root)
+mloadslot.set("1")
 
 
 def set_high_precision(enable):
@@ -236,7 +243,6 @@ def record_macro():
     mouse.unhook_all()
     keyboard.unhook_all()
 
-    # Filter out the 'slash' key events and sort by time
     recorded_events = [e for e in recorded_events if not (isinstance(e, keyboard.KeyboardEvent) and e.name == 'slash')]
     recorded_events.sort(key=lambda e: e.time)
 
@@ -291,6 +297,34 @@ def playback_macro():
         is_playing_macro = False
 
 
+def save_cmacro():
+    global recorded_events, msaveslot
+
+    slot = msaveslot.get()
+
+    if not config.has_section("MACRODATA"):
+        config.add_section("MACRODATA")
+
+    serialized_data = pickle.dumps(recorded_events).hex()
+    config.set("MACRODATA", "recordsaveslot" + slot, serialized_data)
+
+    with open("config.ini", "w") as f:
+        config.write(f)
+
+
+def load_cmacro():
+    global recorded_events, mloadslot
+
+    slot = mloadslot.get()
+    try:
+        serialized_data = config.get("MACRODATA", "recordsaveslot" + slot)
+        recorded_events = pickle.loads(bytes.fromhex(serialized_data))
+
+    except Exception as e:
+        print(f"Error loading slot {slot}: {e}")
+        recorded_events = []
+
+
 notebook = ttk.Notebook(root)
 notebook.pack(fill="both", expand=True)
 
@@ -306,9 +340,6 @@ mframe.grid(row=1, column=0)
 
 mframe2 = ttk.Frame(tab_macro, padding=20, relief="groove", borderwidth=5)
 mframe2.grid(row=2, column=0)
-
-mlabel = ttk.Label(tab_macro, text="Macros", font=("Calibri", 20))
-mlabel.grid(row=0, column=2)
 
 # frame 1
 mlabel2 = ttk.Label(mframe, text="Autoclicker", font=("Calibri", 17))
@@ -351,6 +382,18 @@ mbutton6.grid(row=3, column=0, pady=10)
 mbutton7 = ttk.Button(mframe2, text="Record",
                       command=lambda: threading.Thread(target=record, daemon=True, args=("2",)).start())
 mbutton7.grid(row=3, column=1)
+
+mbutton8 = ttk.Button(mframe2, text="Save as slot:", command=save_cmacro)
+mbutton8.grid(row=4, column=0, pady=10)
+
+mcbox2 = ttk.Combobox(mframe2, values=["1", "2", "3"], state="readonly", textvariable=msaveslot)
+mcbox2.grid(row=4, column=1, padx=10)
+
+mbutton9 = ttk.Button(mframe2, text="Load slot:", command=load_cmacro)
+mbutton9.grid(row=5, column=0, pady=10)
+
+mcbox3 = ttk.Combobox(mframe2, values=["1", "2", "3"], state="readonly", textvariable=mloadslot)
+mcbox3.grid(row=5, column=1, padx=10)
 
 threading.Thread(target=exit_listener, daemon=True).start()
 root.mainloop()
