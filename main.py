@@ -48,12 +48,14 @@ clicks = 0
 recorded_key = ""
 clickstop = False
 recorded_events = []
+advmacro = []
 
 is_running_autoclicker = False
 is_recording_macro = False
 is_starting_on = False
 is_recording_key = False
 is_playing_macro = False
+is_running_advmacro = False
 
 root = tk.Tk()
 root.title("Original Macro")
@@ -81,6 +83,9 @@ mloadslot.set("1")
 
 mclearslot = tk.StringVar(root)
 mclearslot.set("1")
+
+advmacrovar = tk.StringVar(root)
+advmacrovar.set("Empty")
 
 
 def set_high_precision(enable):
@@ -120,6 +125,18 @@ def record(frame):
                 recorded_key = event.name
                 print(f"Key recorded: {recorded_key}")
                 mbutton7.config(text=f"Key recorded: {recorded_key}")
+                root.update()
+
+        elif frame == "3":
+            ambutton2.config(text="Recording...")
+            root.update()
+
+            event = keyboard.read_event()
+
+            if event.event_type == keyboard.KEY_DOWN:
+                recorded_key = event.name
+                print(f"Key recorded: {recorded_key}")
+                ambutton2.config(text=f"Key recorded: {recorded_key}")
                 root.update()
     finally:
         is_recording_key = False
@@ -312,6 +329,9 @@ def save_cmacro():
     if not config.has_section("MACRODATA"):
         config.add_section("MACRODATA")
 
+    if not recorded_events:
+        return
+
     serialized_data = pickle.dumps(recorded_events).hex()
     config.set("MACRODATA", "recordsaveslot" + slot, serialized_data)
 
@@ -398,6 +418,72 @@ def clear_slot():
         config.write(f)
 
 
+def add_keybind():
+    global recorded_key
+
+    advmacro.append("Keybind: " + recorded_key)
+    advmacrovar.set("\n".join(advmacro))
+    root.update()
+
+
+def add_delay():
+    delay = amentry.get()
+    try:
+        delay = float(delay)
+        advmacro.append(f"Delay: {delay}")
+        advmacrovar.set("\n".join(advmacro))
+        root.update()
+
+    except ValueError:
+        ambutton3.config(text="Invalid delay!")
+        root.update()
+        time.sleep(0.5)
+        ambutton3.config(text="Add Delay (s):")
+        root.update()
+
+
+def run_advmacro(initialise=True):
+    global advmacrovar, is_running_advmacro
+
+    if is_running_advmacro:
+        return
+    is_running_advmacro = True
+
+    if initialise:
+        for i in range(3, 0, -1):
+            amlabel.config(text=f"Starting in {i}...")
+            root.update()
+            time.sleep(1)
+        amlabel.config(text="Started!")
+        root.update()
+
+    for event in advmacro:
+        if event.startswith("Keybind: "):
+            recorded_key = event.split(": ")[1]
+            keyboard.press_and_release(recorded_key)
+
+        elif event.startswith("Delay: "):
+            delay = float(event.split(": ")[1])
+            time.sleep(delay)
+
+    amlabel.config(text="Advanced Macro")
+    root.update()
+
+    recorded_key = ""
+    is_running_advmacro = False
+
+
+def backspace():
+    global advmacro
+
+    if not advmacro:
+        return
+
+    advmacro.pop()
+    advmacrovar.set("\n".join(advmacro))
+    root.update()
+
+
 notebook = ttk.Notebook(root)
 notebook.pack(fill="both", expand=True)
 
@@ -471,8 +557,39 @@ mcbox3.grid(row=5, column=1, padx=10)
 mbutton10 = ttk.Button(mframe2, text="Clear slot:", command=clear_slot)
 mbutton10.grid(row=6, column=0, pady=10)
 
-mcbox4 = ttk.Combobox(mframe2, values=["1 (Empty)", "2 (Empty)", "3 (Empty)"], state="readonly", textvariable=mclearslot)
+mcbox4 = ttk.Combobox(mframe2, values=["1 (Empty)", "2 (Empty)", "3 (Empty)"], state="readonly",
+                      textvariable=mclearslot)
 mcbox4.grid(row=6, column=1, padx=10)
+
+# advanced macro tab
+amlabel = ttk.Label(tab_admacro, text="Advanced Macro", font=("Calibri", 17))
+amlabel.grid(row=0, column=3, padx=50)
+
+amframe = ttk.Frame(tab_admacro, padding=20, relief="groove", borderwidth=5)
+amframe.grid(row=1, column=0, pady=10)
+
+amlabel2 = ttk.Label(tab_admacro, textvariable=advmacrovar, font=("Calibri", 10))
+amlabel2.grid(row=1, column=3)
+
+ambutton = ttk.Button(amframe, text="Add Keybind:", command=add_keybind)
+ambutton.grid(row=0, column=0, pady=10)
+
+ambutton2 = ttk.Button(amframe, text="Record", command=lambda: threading.Thread(target=record, daemon=True,
+                                                                                args=("3",)).start())
+ambutton2.grid(row=0, column=1, padx=10)
+
+ambutton3 = ttk.Button(amframe, text="Add Delay (s):", command=add_delay)
+ambutton3.grid(row=1, column=0, pady=10)
+
+amentry = ttk.Entry(amframe, width=10)
+amentry.grid(row=1, column=1, padx=10)
+
+ambutton4 = ttk.Button(amframe, text="Run Macro",
+                       command=lambda: threading.Thread(target=run_advmacro, daemon=True).start())
+ambutton4.grid(row=2, column=0, pady=10)
+
+ambutton5 = ttk.Button(amframe, text="Backspace", command=backspace)
+ambutton5.grid(row=2, column=1, padx=10)
 
 threading.Thread(target=check_cmacrodata, daemon=True).start()
 threading.Thread(target=exit_listener, daemon=True).start()
