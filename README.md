@@ -16,6 +16,8 @@ This application includes several features to enhance your workflow:
 *   **Perfect Sync:** Playback is perfectly timed, ensuring keyboard and mouse actions stay in sync exactly as they were performed.
 *   **DPI Aware:** Coordinate accuracy is maintained across different screen resolutions and scaling settings.
 *   **Easy Controls:** Start recording with a button and stop it by pressing the `/` (slash) key.
+*   **Custom Activation:** Record a specific key to start the macro playback whenever it's executed.
+*   **Save to File:** Save macros to a `.ini` file for later playback. Has capabilities to load, save and clear.
 
 ### 3. Advanced Features
 *   **High-Precision Mode:** The app utilizes the Windows timer with 1 ms precision during macro recording for maximum accuracy.
