@@ -25,8 +25,8 @@ import pickle
 import threading
 import time
 import tkinter as tk
-import customtkinter as ctk
 
+import customtkinter as ctk
 import keyboard
 import mouse
 import pydirectinput as pdi
@@ -141,6 +141,18 @@ def record(frame):
                 print(f"Key recorded: {recorded_key}")
                 ambutton2.configure(text=f"Key recorded: {recorded_key}")
                 root.update()
+
+        elif frame == "4":
+            ambutton10.configure(text="Recording...")
+            root.update()
+
+            event = keyboard.read_event()
+
+            if event.event_type == keyboard.KEY_DOWN:
+                recorded_key = event.name
+                print(f"Key recorded: {recorded_key}")
+                ambutton10.configure(text=f"Key recorded: {recorded_key}")
+                root.update()
     finally:
         is_recording_key = False
 
@@ -234,11 +246,20 @@ def start_on(macro, editbutton):
                 mbutton2.configure(text="Start on:")
                 root.update()
                 return
+
             elif editbutton == "mbutton6":
                 mbutton6.configure(text="No key recorded!")
                 root.update()
                 time.sleep(0.5)
                 mbutton6.configure(text="Start on:")
+                root.update()
+                return
+
+            elif editbutton == "ambutton9":
+                ambutton9.configure(text="No key recorded!")
+                root.update()
+                time.sleep(0.5)
+                ambutton9.configure(text="Start on:")
                 root.update()
                 return
 
@@ -249,6 +270,10 @@ def start_on(macro, editbutton):
         elif macro == "Custom Macro":
             keyboard.wait(recorded_key)
             threading.Thread(target=playback_macro, daemon=True).start()
+
+        elif macro == "Advanced Macro":
+            keyboard.wait(recorded_key)
+            threading.Thread(target=run_advmacro, daemon=True, args=(False,)).start()
 
     finally:
         is_starting_on = False
@@ -356,65 +381,116 @@ def load_cmacro():
         recorded_events = []
 
 
-last_macro_values = []
+last_adv_macro_values = []
+last_rec_macro_values = []
 
 
-def check_cmacrodata():
-    global last_macro_values
+def check_macrodata():
+    global last_adv_macro_values, last_rec_macro_values
     if not config.has_section("MACRODATA"):
         config.add_section("MACRODATA")
 
     new_values = []
     for i in range(1, 4):
-        slot_name = f"recordsaveslot{i}"
+        slot_name = f"advancedsaveslot{i}"
         if config.has_option("MACRODATA", slot_name) and config.get("MACRODATA", slot_name).strip():
             new_values.append(f"{i} (Full)")
         else:
             new_values.append(f"{i} (Empty)")
 
-    if new_values != last_macro_values:
-        mcbox2.configure(values=new_values)
-        mcbox3.configure(values=new_values)
-        mcbox4.configure(values=new_values)
-        last_macro_values = new_values
+    if new_values != last_adv_macro_values:
+        amcbox.configure(values=new_values)
+        amcbox2.configure(values=new_values)
+        amcbox3.configure(values=new_values)
+        last_adv_macro_values = new_values
 
-    curr_save = msaveslot.get()
+    curr_save = advsaveslot.get()
     if curr_save.isdigit():
         idx = int(curr_save) - 1
         if 0 <= idx < len(new_values):
-            msaveslot.set(new_values[idx])
+            advsaveslot.set(new_values[idx])
     elif "(" in curr_save:
         slot_num = curr_save.split(" ")[0]
         if slot_num.isdigit():
             idx = int(slot_num) - 1
             if 0 <= idx < len(new_values) and curr_save != new_values[idx]:
-                msaveslot.set(new_values[idx])
+                advsaveslot.set(new_values[idx])
 
-    curr_load = mloadslot.get()
+    curr_load = advloadslot.get()
     if curr_load.isdigit():
         idx = int(curr_load) - 1
         if 0 <= idx < len(new_values):
-            mloadslot.set(new_values[idx])
+            advloadslot.set(new_values[idx])
     elif "(" in curr_load:
         slot_num = curr_load.split(" ")[0]
         if slot_num.isdigit():
             idx = int(slot_num) - 1
             if 0 <= idx < len(new_values) and curr_load != new_values[idx]:
-                mloadslot.set(new_values[idx])
+                advloadslot.set(new_values[idx])
 
-    curr_clear = mclearslot.get()
+    curr_clear = advclearslot.get()
     if curr_clear.isdigit():
         idx = int(curr_clear) - 1
         if 0 <= idx < len(new_values):
-            mclearslot.set(new_values[idx])
+            advclearslot.set(new_values[idx])
     elif "(" in curr_clear:
         slot_num = curr_clear.split(" ")[0]
         if slot_num.isdigit():
             idx = int(slot_num) - 1
             if 0 <= idx < len(new_values) and curr_clear != new_values[idx]:
-                mclearslot.set(new_values[idx])
+                advclearslot.set(new_values[idx])
 
-    root.after(500, check_cmacrodata)
+    new_rec_values = []
+    for i in range(1, 4):
+        slot_name = f"recordsaveslot{i}"
+        if config.has_option("MACRODATA", slot_name) and config.get("MACRODATA", slot_name).strip():
+            new_rec_values.append(f"{i} (Full)")
+        else:
+            new_rec_values.append(f"{i} (Empty)")
+
+    if new_rec_values != last_rec_macro_values:
+        mcbox2.configure(values=new_rec_values)
+        mcbox3.configure(values=new_rec_values)
+        mcbox4.configure(values=new_rec_values)
+        last_rec_macro_values = new_rec_values
+
+    curr_save = msaveslot.get()
+    if curr_save.isdigit():
+        idx = int(curr_save) - 1
+        if 0 <= idx < len(new_rec_values):
+            msaveslot.set(new_rec_values[idx])
+    elif "(" in curr_save:
+        slot_num = curr_save.split(" ")[0]
+        if slot_num.isdigit():
+            idx = int(slot_num) - 1
+            if 0 <= idx < len(new_rec_values) and curr_save != new_rec_values[idx]:
+                msaveslot.set(new_rec_values[idx])
+
+    curr_load = mloadslot.get()
+    if curr_load.isdigit():
+        idx = int(curr_load) - 1
+        if 0 <= idx < len(new_rec_values):
+            mloadslot.set(new_rec_values[idx])
+    elif "(" in curr_load:
+        slot_num = curr_load.split(" ")[0]
+        if slot_num.isdigit():
+            idx = int(slot_num) - 1
+            if 0 <= idx < len(new_rec_values) and curr_load != new_rec_values[idx]:
+                mloadslot.set(new_rec_values[idx])
+
+    curr_clear = mclearslot.get()
+    if curr_clear.isdigit():
+        idx = int(curr_clear) - 1
+        if 0 <= idx < len(new_rec_values):
+            mclearslot.set(new_rec_values[idx])
+    elif "(" in curr_clear:
+        slot_num = curr_clear.split(" ")[0]
+        if slot_num.isdigit():
+            idx = int(slot_num) - 1
+            if 0 <= idx < len(new_rec_values) and curr_clear != new_rec_values[idx]:
+                mclearslot.set(new_rec_values[idx])
+
+    root.after(500, check_macrodata)
 
 
 def clear_slot():
@@ -498,7 +574,8 @@ def save_advmacro():
     if not advmacro:
         return
 
-    slot = advsaveslot.get()
+    slot_val = advsaveslot.get()
+    slot = slot_val.split(" ")[0]
 
     serialized_data = pickle.dumps(advmacro).hex()
     config.set("MACRODATA", "advancedsaveslot" + slot, serialized_data)
@@ -510,7 +587,8 @@ def save_advmacro():
 def load_advmacro():
     global advmacro
 
-    slot = advloadslot.get()
+    slot_val = advloadslot.get()
+    slot = slot_val.split(" ")[0]
 
     try:
         serialized_data = config.get("MACRODATA", "advancedsaveslot" + slot)
@@ -525,7 +603,8 @@ def load_advmacro():
 
 
 def clear_advslot():
-    slot = advclearslot.get()
+    slot_val = advclearslot.get()
+    slot = slot_val.split(" ")[0]
 
     config.set("MACRODATA", f"advancedsaveslot{slot}", "")
 
@@ -628,7 +707,7 @@ ambutton = ctk.CTkButton(amframe, text="Add Keybind:", command=add_keybind)
 ambutton.grid(row=0, column=0, pady=10)
 
 ambutton2 = ctk.CTkButton(amframe, text="Record", command=lambda: threading.Thread(target=record, daemon=True,
-                                                                                 args=("3",)).start())
+                                                                                   args=("3",)).start())
 ambutton2.grid(row=0, column=1, padx=10)
 
 ambutton3 = ctk.CTkButton(amframe, text="Add Delay (s):", command=add_delay)
@@ -643,6 +722,15 @@ ambutton4.grid(row=2, column=0, pady=10)
 
 ambutton5 = ctk.CTkButton(amframe, text="Backspace", command=backspace)
 ambutton5.grid(row=2, column=1, padx=10)
+
+ambutton9 = ctk.CTkButton(amframe, text="Start on:",
+                          command=lambda: threading.Thread(target=start_on, daemon=True, args=("Advanced Macro",
+                                                                                               "ambutton9")).start())
+ambutton9.grid(row=3, column=0, pady=10)
+
+ambutton10 = ctk.CTkButton(amframe, text="Record",
+                           command=lambda: threading.Thread(target=record, daemon=True, args=("4",)).start())
+ambutton10.grid(row=3, column=1, padx=10)
 
 # frame 2
 ambutton6 = ctk.CTkButton(amframe2, text="Save as slot:", command=save_advmacro)
@@ -663,6 +751,6 @@ ambutton8.grid(row=2, column=0, pady=10)
 amcbox3 = ctk.CTkComboBox(amframe2, values=["1", "2", "3"], state="readonly", variable=advclearslot)
 amcbox3.grid(row=2, column=1, padx=10)
 
-check_cmacrodata()
+check_macrodata()
 threading.Thread(target=exit_listener, daemon=True).start()
 root.mainloop()
