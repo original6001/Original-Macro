@@ -263,20 +263,48 @@ def start_on(macro, editbutton):
                 root.update()
                 return
 
-        if macro == "Autoclicker":
-            keyboard.wait(recorded_key)
-            threading.Thread(target=autoclicker, daemon=True, args=(False,)).start()
+        if editbutton == "mbutton2":
+            mbutton2.configure(text="Listening...")
+            root.update()
 
-        elif macro == "Custom Macro":
-            keyboard.wait(recorded_key)
-            threading.Thread(target=playback_macro, daemon=True).start()
+        elif editbutton == "mbutton6":
+            mbutton6.configure(text="Listening...")
+            root.update()
 
-        elif macro == "Advanced Macro":
-            keyboard.wait(recorded_key)
-            threading.Thread(target=run_advmacro, daemon=True, args=(False,)).start()
+        elif editbutton == "ambutton9":
+            ambutton9.configure(text="Listening...")
+            root.update()
+
+        while is_starting_on:
+            if keyboard.is_pressed(recorded_key):
+                if macro == "Autoclicker":
+                    threading.Thread(target=autoclicker, daemon=True, args=(False,)).start()
+
+                elif macro == "Custom Macro":
+                    threading.Thread(target=playback_macro, daemon=True).start()
+
+                elif macro == "Advanced Macro":
+                    threading.Thread(target=run_advmacro, daemon=True, args=(False,)).start()
+
+                while keyboard.is_pressed(recorded_key):
+                    if not is_starting_on:
+                        break
+                    time.sleep(0.05)
+
+            time.sleep(0.05)
 
     finally:
         is_starting_on = False
+
+
+def stop_start_on():
+    global is_starting_on
+
+    is_starting_on = False
+    mbutton2.configure(text="Start on:")
+    mbutton6.configure(text="Start on:")
+    ambutton9.configure(text="Start on:")
+    root.update()
 
 
 def record_macro():
@@ -629,8 +657,8 @@ mlabel.grid(row=0, column=0, pady=5)
 mframe = ctk.CTkFrame(tab_macro, border_width=2)
 mframe.grid(row=1, column=0, pady=5)
 
-mframe2 = ctk.CTkFrame(tab_macro, border_width=2)
-mframe2.grid(row=2, column=0, pady=10, padx=10)
+mframe2 = ctk.CTkScrollableFrame(tab_macro, border_width=2, width=300, height=200)
+mframe2.grid(row=2, column=0, pady=10)
 
 # frame 1
 mlabel2 = ctk.CTkLabel(mframe, text="Autoclicker", font=("Calibri", 17))
@@ -653,6 +681,9 @@ mbutton3 = ctk.CTkButton(mframe, text="Record",
                          command=lambda: threading.Thread(target=record, daemon=True, args=("1",)).start())
 mbutton3.grid(row=3, column=1)
 
+mbutton13 = ctk.CTkButton(mframe, text="Stop Listening", command=stop_start_on)
+mbutton13.grid(row=4, column=0, pady=10)
+
 # frame 2
 mlabel3 = ctk.CTkLabel(mframe2, text="Custom Macro", font=("Calibri", 17))
 mlabel3.grid(row=0, column=0)
@@ -674,30 +705,33 @@ mbutton7 = ctk.CTkButton(mframe2, text="Record",
                          command=lambda: threading.Thread(target=record, daemon=True, args=("2",)).start())
 mbutton7.grid(row=3, column=1)
 
+mbutton12 = ctk.CTkButton(mframe2, text="Stop Listening", command=stop_start_on)
+mbutton12.grid(row=4, column=0, pady=10)
+
 mbutton8 = ctk.CTkButton(mframe2, text="Save as slot:", command=save_cmacro)
-mbutton8.grid(row=4, column=0, pady=10)
+mbutton8.grid(row=5, column=0, pady=10)
 
 mcbox2 = ctk.CTkComboBox(mframe2, values=["1 (Empty)", "2 (Empty)", "3 (Empty)"], state="readonly", variable=msaveslot)
-mcbox2.grid(row=4, column=1, padx=10)
+mcbox2.grid(row=5, column=1, padx=10)
 
 mbutton9 = ctk.CTkButton(mframe2, text="Load slot:", command=load_cmacro)
-mbutton9.grid(row=5, column=0, pady=10)
+mbutton9.grid(row=6, column=0, pady=10)
 
 mcbox3 = ctk.CTkComboBox(mframe2, values=["1 (Empty)", "2 (Empty)", "3 (Empty)"], state="readonly", variable=mloadslot)
-mcbox3.grid(row=5, column=1, padx=10)
+mcbox3.grid(row=6, column=1, padx=10)
 
 mbutton10 = ctk.CTkButton(mframe2, text="Clear slot:", command=clear_slot)
-mbutton10.grid(row=6, column=0, pady=10)
+mbutton10.grid(row=7, column=0, pady=10)
 
 mcbox4 = ctk.CTkComboBox(mframe2, values=["1 (Empty)", "2 (Empty)", "3 (Empty)"], state="readonly",
                          variable=mclearslot)
-mcbox4.grid(row=6, column=1, padx=10)
+mcbox4.grid(row=7, column=1, padx=10)
 
 # advanced macro tab
 amlabel = ctk.CTkLabel(tab_admacro, text="Advanced Macro", font=("Calibri", 25))
 amlabel.grid(row=0, column=3, padx=50)
 
-amframe = ctk.CTkFrame(tab_admacro, border_width=2)
+amframe = ctk.CTkScrollableFrame(tab_admacro, border_width=2, width=300, height=200)
 amframe.grid(row=1, column=0, pady=10)
 
 amframe2 = ctk.CTkFrame(tab_admacro, border_width=2)
@@ -706,6 +740,8 @@ amframe2.grid(row=2, column=0, pady=10)
 amlabel2 = ctk.CTkLabel(tab_admacro, textvariable=advmacrovar, font=("Calibri", 14))
 amlabel2.grid(row=1, column=3)
 
+amlabel3 = ctk.CTkLabel(tab_admacro, text="Controls", font=("Calibri", 25))
+amlabel3.grid(row=0, column=0, pady=10)
 # frame 1
 ambutton = ctk.CTkButton(amframe, text="Add Keybind:", command=add_keybind)
 ambutton.grid(row=0, column=0, pady=10)
@@ -735,6 +771,9 @@ ambutton9.grid(row=3, column=0, pady=10)
 ambutton10 = ctk.CTkButton(amframe, text="Record",
                            command=lambda: threading.Thread(target=record, daemon=True, args=("4",)).start())
 ambutton10.grid(row=3, column=1, padx=10)
+
+ambutton11 = ctk.CTkButton(amframe, text="Stop Listening", command=stop_start_on)
+ambutton11.grid(row=4, column=0, pady=10)
 
 # frame 2
 ambutton6 = ctk.CTkButton(amframe2, text="Save as slot:", command=save_advmacro)
