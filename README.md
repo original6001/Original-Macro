@@ -59,11 +59,12 @@ This tool is built using Python and the following libraries:
 *   `keyboard`
 *   `mouse`
 *   `pydirectinput`
-*   `tkinter` (usually included with Python)
+*   `configparser`
+*   `custontkinter`
 
 Install the dependencies by running the `install_dependencies.bat` file or manually using:
 ```bash
-pip install keyboard mouse pydirectinput
+pip install keyboard mouse pydirectinput customtkinter
 ```
 
 ## License
