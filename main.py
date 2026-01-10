@@ -283,6 +283,8 @@ def record_macro():
     global recorded_events
     recorded_events = []
 
+    root.withdraw()
+
     mouse.hook(recorded_events.append)
     keyboard.hook(recorded_events.append)
 
@@ -293,6 +295,8 @@ def record_macro():
 
     recorded_events = [e for e in recorded_events if not (isinstance(e, keyboard.KeyboardEvent) and e.name == 'slash')]
     recorded_events.sort(key=lambda e: e.time)
+
+    root.deiconify()
 
     mbutton5.configure(text="Recorded")
     root.update()
