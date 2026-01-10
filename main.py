@@ -25,7 +25,7 @@ import pickle
 import threading
 import time
 import tkinter as tk
-from tkinter import ttk
+import customtkinter as ctk
 
 import keyboard
 import mouse
@@ -57,20 +57,14 @@ is_recording_key = False
 is_playing_macro = False
 is_running_advmacro = False
 
-root = tk.Tk()
-root.title("Original Macro")
-root.geometry("700x550")
-root.resizable(False, False)
-root.configure(bg="#1f1732")
-root.iconbitmap("original-macro-logo.ico")
+ctk.set_appearance_mode("dark")
+ctk.set_default_color_theme("blue")
 
-# configuring the style
-style = ttk.Style()
-style.configure("TLabel", background="#1f1732", foreground="white")
-style.configure("TFrame", background="#1f1732")
-style.configure("TEntry", fieldbackground="#1f1732", foreground="black")
-style.configure("TButton", background="#1f1732", foreground="black")
-style.configure("TCombobox", background="#1f1732", foreground="black")
+root = ctk.CTk()
+root.title("Original Macro")
+root.geometry("650x500")
+root.resizable(False, False)
+root.iconbitmap("original-macro-logo.ico")
 
 clickspeed = tk.StringVar(root)
 clickspeed.set("10 CPS")
@@ -113,7 +107,7 @@ def record(frame):
 
     try:
         if frame == "1":
-            mbutton3.config(text="Recording...")
+            mbutton3.configure(text="Recording...")
             root.update()
 
             event = keyboard.read_event()
@@ -121,11 +115,11 @@ def record(frame):
             if event.event_type == keyboard.KEY_DOWN:
                 recorded_key = event.name
                 print(f"Key recorded: {recorded_key}")
-                mbutton3.config(text=f"Key recorded: {recorded_key}")
+                mbutton3.configure(text=f"Key recorded: {recorded_key}")
                 root.update()
 
         elif frame == "2":
-            mbutton7.config(text="Recording...")
+            mbutton7.configure(text="Recording...")
             root.update()
 
             event = keyboard.read_event()
@@ -133,11 +127,11 @@ def record(frame):
             if event.event_type == keyboard.KEY_DOWN:
                 recorded_key = event.name
                 print(f"Key recorded: {recorded_key}")
-                mbutton7.config(text=f"Key recorded: {recorded_key}")
+                mbutton7.configure(text=f"Key recorded: {recorded_key}")
                 root.update()
 
         elif frame == "3":
-            ambutton2.config(text="Recording...")
+            ambutton2.configure(text="Recording...")
             root.update()
 
             event = keyboard.read_event()
@@ -145,7 +139,7 @@ def record(frame):
             if event.event_type == keyboard.KEY_DOWN:
                 recorded_key = event.name
                 print(f"Key recorded: {recorded_key}")
-                ambutton2.config(text=f"Key recorded: {recorded_key}")
+                ambutton2.configure(text=f"Key recorded: {recorded_key}")
                 root.update()
     finally:
         is_recording_key = False
@@ -181,10 +175,10 @@ def autoclicker(initialise=True):
     try:
         if initialise:
             for i in range(3, 0, -1):
-                mlabel.config(text=f"Starting in {i}...")
+                mlabel.configure(text=f"Starting in {i}...")
                 root.update()
                 time.sleep(1)
-            mlabel.config(text="Autoclicker Started!")
+            mlabel.configure(text="Autoclicker Started!")
             root.update()
 
         threading.Thread(target=autoclicker_stop, daemon=True).start()
@@ -218,7 +212,7 @@ def autoclicker(initialise=True):
 
         clicks = 0
         clickstop = False
-        mlabel.config(text="Macros")
+        mlabel.configure(text="Macros")
         root.update()
     finally:
         is_running_autoclicker = False
@@ -234,17 +228,17 @@ def start_on(macro, editbutton):
     try:
         if not recorded_key:
             if editbutton == "mbutton2":
-                mbutton2.config(text="No key recorded!")
+                mbutton2.configure(text="No key recorded!")
                 root.update()
                 time.sleep(0.5)
-                mbutton2.config(text="Start on:")
+                mbutton2.configure(text="Start on:")
                 root.update()
                 return
             elif editbutton == "mbutton6":
-                mbutton6.config(text="No key recorded!")
+                mbutton6.configure(text="No key recorded!")
                 root.update()
                 time.sleep(0.5)
-                mbutton6.config(text="Start on:")
+                mbutton6.configure(text="Start on:")
                 root.update()
                 return
 
@@ -275,10 +269,10 @@ def record_macro():
     recorded_events = [e for e in recorded_events if not (isinstance(e, keyboard.KeyboardEvent) and e.name == 'slash')]
     recorded_events.sort(key=lambda e: e.time)
 
-    mbutton5.config(text="Recorded")
+    mbutton5.configure(text="Recorded")
     root.update()
     time.sleep(0.5)
-    mbutton5.config(text="Record Macro - '/' to stop.")
+    mbutton5.configure(text="Record Macro - '/' to stop.")
     return
 
 
@@ -362,60 +356,65 @@ def load_cmacro():
         recorded_events = []
 
 
+last_macro_values = []
+
+
 def check_cmacrodata():
+    global last_macro_values
     if not config.has_section("MACRODATA"):
         config.add_section("MACRODATA")
 
-    while True:
-        new_values = []
-        for i in range(1, 4):
-            slot_name = f"recordsaveslot{i}"
-            if config.has_option("MACRODATA", slot_name) and config.get("MACRODATA", slot_name).strip():
-                new_values.append(f"{i} (Full)")
-            else:
-                new_values.append(f"{i} (Empty)")
+    new_values = []
+    for i in range(1, 4):
+        slot_name = f"recordsaveslot{i}"
+        if config.has_option("MACRODATA", slot_name) and config.get("MACRODATA", slot_name).strip():
+            new_values.append(f"{i} (Full)")
+        else:
+            new_values.append(f"{i} (Empty)")
 
-        mcbox2["values"] = new_values
-        mcbox3["values"] = new_values
-        mcbox4["values"] = new_values
+    if new_values != last_macro_values:
+        mcbox2.configure(values=new_values)
+        mcbox3.configure(values=new_values)
+        mcbox4.configure(values=new_values)
+        last_macro_values = new_values
 
-        curr_save = msaveslot.get()
-        if curr_save.isdigit():
-            idx = int(curr_save) - 1
-            if 0 <= idx < len(new_values):
-                msaveslot.set(new_values[idx])
-
-        elif "(" in curr_save:
-            slot_num = curr_save.split(" ")[0]
+    curr_save = msaveslot.get()
+    if curr_save.isdigit():
+        idx = int(curr_save) - 1
+        if 0 <= idx < len(new_values):
+            msaveslot.set(new_values[idx])
+    elif "(" in curr_save:
+        slot_num = curr_save.split(" ")[0]
+        if slot_num.isdigit():
             idx = int(slot_num) - 1
             if 0 <= idx < len(new_values) and curr_save != new_values[idx]:
                 msaveslot.set(new_values[idx])
 
-        curr_load = mloadslot.get()
-        if curr_load.isdigit():
-            idx = int(curr_load) - 1
-            if 0 <= idx < len(new_values):
-                mloadslot.set(new_values[idx])
-
-        elif "(" in curr_load:
-            slot_num = curr_load.split(" ")[0]
+    curr_load = mloadslot.get()
+    if curr_load.isdigit():
+        idx = int(curr_load) - 1
+        if 0 <= idx < len(new_values):
+            mloadslot.set(new_values[idx])
+    elif "(" in curr_load:
+        slot_num = curr_load.split(" ")[0]
+        if slot_num.isdigit():
             idx = int(slot_num) - 1
             if 0 <= idx < len(new_values) and curr_load != new_values[idx]:
                 mloadslot.set(new_values[idx])
 
-        curr_load = mclearslot.get()
-        if curr_load.isdigit():
-            idx = int(curr_load) - 1
-            if 0 <= idx < len(new_values):
-                mclearslot.set(new_values[idx])
-
-        elif "(" in curr_load:
-            slot_num = curr_load.split(" ")[0]
+    curr_clear = mclearslot.get()
+    if curr_clear.isdigit():
+        idx = int(curr_clear) - 1
+        if 0 <= idx < len(new_values):
+            mclearslot.set(new_values[idx])
+    elif "(" in curr_clear:
+        slot_num = curr_clear.split(" ")[0]
+        if slot_num.isdigit():
             idx = int(slot_num) - 1
-            if 0 <= idx < len(new_values) and curr_load != new_values[idx]:
+            if 0 <= idx < len(new_values) and curr_clear != new_values[idx]:
                 mclearslot.set(new_values[idx])
 
-        time.sleep(0.5)
+    root.after(500, check_cmacrodata)
 
 
 def clear_slot():
@@ -444,10 +443,10 @@ def add_delay():
         root.update()
 
     except ValueError:
-        ambutton3.config(text="Invalid delay!")
+        ambutton3.configure(text="Invalid delay!")
         root.update()
         time.sleep(0.5)
-        ambutton3.config(text="Add Delay (s):")
+        ambutton3.configure(text="Add Delay (s):")
         root.update()
 
 
@@ -460,10 +459,10 @@ def run_advmacro(initialise=True):
 
     if initialise:
         for i in range(3, 0, -1):
-            amlabel.config(text=f"Starting in {i}...")
+            amlabel.configure(text=f"Starting in {i}...")
             root.update()
             time.sleep(1)
-        amlabel.config(text="Started!")
+        amlabel.configure(text="Started!")
         root.update()
 
     for event in advmacro:
@@ -475,7 +474,7 @@ def run_advmacro(initialise=True):
             delay = float(event.split(": ")[1])
             time.sleep(delay)
 
-    amlabel.config(text="Advanced Macro")
+    amlabel.configure(text="Advanced Macro")
     root.update()
 
     recorded_key = ""
@@ -534,136 +533,136 @@ def clear_advslot():
         config.write(f)
 
 
-notebook = ttk.Notebook(root)
+notebook = ctk.CTkTabview(root)
 notebook.pack(fill="both", expand=True)
 
-tab_macro = ttk.Frame(notebook)
-notebook.add(tab_macro, text="Macro")
-
-tab_admacro = ttk.Frame(notebook)
-notebook.add(tab_admacro, text="Advanced Macro")
+tab_macro = notebook.add("Macro")
+tab_admacro = notebook.add("Advanced Macro")
 
 # macro tab
-mframe = ttk.Frame(tab_macro, padding=20, relief="groove", borderwidth=5)
+mlabel = ctk.CTkLabel(tab_macro, text="Macros", font=("Calibri", 25))
+mlabel.grid(row=0, column=0, pady=5)
+
+mframe = ctk.CTkFrame(tab_macro, border_width=2)
 mframe.grid(row=1, column=0, pady=5)
 
-mframe2 = ttk.Frame(tab_macro, padding=20, relief="groove", borderwidth=5)
+mframe2 = ctk.CTkFrame(tab_macro, border_width=2)
 mframe2.grid(row=2, column=0, pady=10, padx=10)
 
 # frame 1
-mlabel2 = ttk.Label(mframe, text="Autoclicker", font=("Calibri", 17))
-mlabel2.grid(row=0, column=0)
+mlabel2 = ctk.CTkLabel(mframe, text="Autoclicker", font=("Calibri", 17))
+mlabel2.grid(row=0, column=0, padx=10)
 
-mbutton = ttk.Button(mframe, text="Autoclicker - 'c' to stop.",
-                     command=lambda: threading.Thread(target=autoclicker, daemon=True).start())
+mbutton = ctk.CTkButton(mframe, text="Autoclicker - 'c' to stop.",
+                        command=lambda: threading.Thread(target=autoclicker, daemon=True).start())
 mbutton.grid(row=2, column=0)
 
-mcbox = ttk.Combobox(mframe, values=["10 CPS", "15 CPS", "20 CPS", "100 CPS"], state="readonly",
-                     textvariable=clickspeed)
+mcbox = ctk.CTkComboBox(mframe, values=["10 CPS", "15 CPS", "20 CPS", "100 CPS"], state="readonly",
+                        variable=clickspeed)
 mcbox.grid(row=2, column=1, padx=10)
 
-mbutton2 = ttk.Button(mframe, text="Start on:",
-                      command=lambda: threading.Thread(target=start_on, daemon=True,
-                                                       args=("Autoclicker", "mbutton2",)).start())
+mbutton2 = ctk.CTkButton(mframe, text="Start on:",
+                         command=lambda: threading.Thread(target=start_on, daemon=True,
+                                                          args=("Autoclicker", "mbutton2",)).start())
 mbutton2.grid(row=3, column=0, pady=10)
 
-mbutton3 = ttk.Button(mframe, text="Record",
-                      command=lambda: threading.Thread(target=record, daemon=True, args=("1",)).start())
+mbutton3 = ctk.CTkButton(mframe, text="Record",
+                         command=lambda: threading.Thread(target=record, daemon=True, args=("1",)).start())
 mbutton3.grid(row=3, column=1)
 
 # frame 2
-mlabel3 = ttk.Label(mframe2, text="Custom Macro", font=("Calibri", 17))
+mlabel3 = ctk.CTkLabel(mframe2, text="Custom Macro", font=("Calibri", 17))
 mlabel3.grid(row=0, column=0)
 
-mbutton4 = ttk.Button(mframe2, text="Playback Macro",
-                      command=lambda: threading.Thread(target=playback_macro, daemon=True).start())
+mbutton4 = ctk.CTkButton(mframe2, text="Playback Macro",
+                         command=lambda: threading.Thread(target=playback_macro, daemon=True).start())
 mbutton4.grid(row=2, column=0)
 
-mbutton5 = ttk.Button(mframe2, text="Record Macro - '/' to stop.",
-                      command=lambda: threading.Thread(target=start_record_macro, daemon=True).start())
-mbutton5.grid(row=2, column=1)
+mbutton5 = ctk.CTkButton(mframe2, text="Record Macro - '/' to stop.",
+                         command=lambda: threading.Thread(target=start_record_macro, daemon=True).start())
+mbutton5.grid(row=2, column=1, padx=10)
 
-mbutton6 = ttk.Button(mframe2, text="Start on:",
-                      command=lambda: threading.Thread(target=start_on, daemon=True,
-                                                       args=("Custom Macro", "mbutton6")).start())
+mbutton6 = ctk.CTkButton(mframe2, text="Start on:",
+                         command=lambda: threading.Thread(target=start_on, daemon=True,
+                                                          args=("Custom Macro", "mbutton6")).start())
 mbutton6.grid(row=3, column=0, pady=10)
 
-mbutton7 = ttk.Button(mframe2, text="Record",
-                      command=lambda: threading.Thread(target=record, daemon=True, args=("2",)).start())
+mbutton7 = ctk.CTkButton(mframe2, text="Record",
+                         command=lambda: threading.Thread(target=record, daemon=True, args=("2",)).start())
 mbutton7.grid(row=3, column=1)
 
-mbutton8 = ttk.Button(mframe2, text="Save as slot:", command=save_cmacro)
+mbutton8 = ctk.CTkButton(mframe2, text="Save as slot:", command=save_cmacro)
 mbutton8.grid(row=4, column=0, pady=10)
 
-mcbox2 = ttk.Combobox(mframe2, values=["1 (Empty)", "2 (Empty)", "3 (Empty)"], state="readonly", textvariable=msaveslot)
+mcbox2 = ctk.CTkComboBox(mframe2, values=["1 (Empty)", "2 (Empty)", "3 (Empty)"], state="readonly", variable=msaveslot)
 mcbox2.grid(row=4, column=1, padx=10)
 
-mbutton9 = ttk.Button(mframe2, text="Load slot:", command=load_cmacro)
+mbutton9 = ctk.CTkButton(mframe2, text="Load slot:", command=load_cmacro)
 mbutton9.grid(row=5, column=0, pady=10)
 
-mcbox3 = ttk.Combobox(mframe2, values=["1 (Empty)", "2 (Empty)", "3 (Empty)"], state="readonly", textvariable=mloadslot)
+mcbox3 = ctk.CTkComboBox(mframe2, values=["1 (Empty)", "2 (Empty)", "3 (Empty)"], state="readonly", variable=mloadslot)
 mcbox3.grid(row=5, column=1, padx=10)
 
-mbutton10 = ttk.Button(mframe2, text="Clear slot:", command=clear_slot)
+mbutton10 = ctk.CTkButton(mframe2, text="Clear slot:", command=clear_slot)
 mbutton10.grid(row=6, column=0, pady=10)
 
-mcbox4 = ttk.Combobox(mframe2, values=["1 (Empty)", "2 (Empty)", "3 (Empty)"], state="readonly",
-                      textvariable=mclearslot)
+mcbox4 = ctk.CTkComboBox(mframe2, values=["1 (Empty)", "2 (Empty)", "3 (Empty)"], state="readonly",
+                         variable=mclearslot)
 mcbox4.grid(row=6, column=1, padx=10)
 
 # advanced macro tab
-amlabel = ttk.Label(tab_admacro, text="Advanced Macro", font=("Calibri", 17))
+amlabel = ctk.CTkLabel(tab_admacro, text="Advanced Macro", font=("Calibri", 25))
 amlabel.grid(row=0, column=3, padx=50)
 
-amframe = ttk.Frame(tab_admacro, padding=20, relief="groove", borderwidth=5)
+amframe = ctk.CTkFrame(tab_admacro, border_width=2)
 amframe.grid(row=1, column=0, pady=10)
 
-amframe2 = ttk.Frame(tab_admacro, padding=20, relief="groove", borderwidth=5)
+amframe2 = ctk.CTkFrame(tab_admacro, border_width=2)
 amframe2.grid(row=2, column=0, pady=10)
 
-amlabel2 = ttk.Label(tab_admacro, textvariable=advmacrovar, font=("Calibri", 10))
+amlabel2 = ctk.CTkLabel(tab_admacro, textvariable=advmacrovar, font=("Calibri", 14))
 amlabel2.grid(row=1, column=3)
 
 # frame 1
-ambutton = ttk.Button(amframe, text="Add Keybind:", command=add_keybind)
+ambutton = ctk.CTkButton(amframe, text="Add Keybind:", command=add_keybind)
 ambutton.grid(row=0, column=0, pady=10)
 
-ambutton2 = ttk.Button(amframe, text="Record", command=lambda: threading.Thread(target=record, daemon=True,
-                                                                                args=("3",)).start())
+ambutton2 = ctk.CTkButton(amframe, text="Record", command=lambda: threading.Thread(target=record, daemon=True,
+                                                                                 args=("3",)).start())
 ambutton2.grid(row=0, column=1, padx=10)
 
-ambutton3 = ttk.Button(amframe, text="Add Delay (s):", command=add_delay)
+ambutton3 = ctk.CTkButton(amframe, text="Add Delay (s):", command=add_delay)
 ambutton3.grid(row=1, column=0, pady=10)
 
-amentry = ttk.Entry(amframe, width=10)
+amentry = ctk.CTkEntry(amframe, width=100)
 amentry.grid(row=1, column=1, padx=10)
 
-ambutton4 = ttk.Button(amframe, text="Run Macro",
-                       command=lambda: threading.Thread(target=run_advmacro, daemon=True).start())
+ambutton4 = ctk.CTkButton(amframe, text="Run Macro",
+                          command=lambda: threading.Thread(target=run_advmacro, daemon=True).start())
 ambutton4.grid(row=2, column=0, pady=10)
 
-ambutton5 = ttk.Button(amframe, text="Backspace", command=backspace)
+ambutton5 = ctk.CTkButton(amframe, text="Backspace", command=backspace)
 ambutton5.grid(row=2, column=1, padx=10)
 
 # frame 2
-ambutton6 = ttk.Button(amframe2, text="Save as slot:", command=save_advmacro)
+ambutton6 = ctk.CTkButton(amframe2, text="Save as slot:", command=save_advmacro)
 ambutton6.grid(row=0, column=0, pady=10)
 
-amcbox = ttk.Combobox(amframe2, values=["1", "2", "3"], state="readonly", textvariable=advsaveslot)
+amcbox = ctk.CTkComboBox(amframe2, values=["1", "2", "3"], state="readonly", variable=advsaveslot)
 amcbox.grid(row=0, column=1, padx=10)
 
-ambutton7 = ttk.Button(amframe2, text="Load slot:", command=load_advmacro)
+ambutton7 = ctk.CTkButton(amframe2, text="Load slot:", command=load_advmacro)
 ambutton7.grid(row=1, column=0, pady=10)
 
-amcbox2 = ttk.Combobox(amframe2, values=["1", "2", "3"], state="readonly", textvariable=advloadslot)
+amcbox2 = ctk.CTkComboBox(amframe2, values=["1", "2", "3"], state="readonly", variable=advloadslot)
 amcbox2.grid(row=1, column=1, padx=10)
 
-ambutton8 = ttk.Button(amframe2, text="Clear slot:", command=clear_advslot)
+ambutton8 = ctk.CTkButton(amframe2, text="Clear slot:", command=clear_advslot)
 ambutton8.grid(row=2, column=0, pady=10)
 
-amcbox3 = ttk.Combobox(amframe2, values=["1", "2", "3"], state="readonly", textvariable=advclearslot)
+amcbox3 = ctk.CTkComboBox(amframe2, values=["1", "2", "3"], state="readonly", variable=advclearslot)
 amcbox3.grid(row=2, column=1, padx=10)
 
-threading.Thread(target=check_cmacrodata, daemon=True).start()
+check_cmacrodata()
 threading.Thread(target=exit_listener, daemon=True).start()
 root.mainloop()
