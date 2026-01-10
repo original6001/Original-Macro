@@ -60,7 +60,7 @@ This tool is built using Python and the following libraries:
 *   `mouse`
 *   `pydirectinput`
 *   `configparser`
-*   `custontkinter`
+*   `customtkinter`
 
 Install the dependencies by running the `install_dependencies.bat` file or manually using:
 ```bash
