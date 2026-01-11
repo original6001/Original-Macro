@@ -90,6 +90,9 @@ advloadslot.set("1")
 advclearslot = tk.StringVar(root)
 advclearslot.set("1")
 
+mspeed = tk.StringVar(root)
+mspeed.set("1x")
+
 
 def set_high_precision(enable):
     if enable:
@@ -281,7 +284,7 @@ def start_on(macro, editbutton):
                     threading.Thread(target=autoclicker, daemon=True, args=(False,)).start()
 
                 elif macro == "Custom Macro":
-                    threading.Thread(target=playback_macro, daemon=True).start()
+                    threading.Thread(target=playback_macro, daemon=True, args=(mspeed.get(),)).start()
 
                 elif macro == "Advanced Macro":
                     threading.Thread(target=run_advmacro, daemon=True, args=(False,)).start()
@@ -347,7 +350,7 @@ def start_record_macro():
         is_recording_macro = False
 
 
-def playback_macro():
+def playback_macro(speed):
     global recorded_events
     global is_playing_macro
 
@@ -359,10 +362,17 @@ def playback_macro():
         if not recorded_events:
             return
 
+        try:
+            speed_factor = float(speed.replace("x", ""))
+            if speed_factor <= 0:
+                speed_factor = 1.0
+        except (ValueError, AttributeError):
+            speed_factor = 1.0
+
         last_time = None
         for event in recorded_events:
             if last_time is not None:
-                delay = event.time - last_time
+                delay = (event.time - last_time) / speed_factor
                 if delay > 0:
                     time.sleep(delay)
 
@@ -689,7 +699,7 @@ mlabel3 = ctk.CTkLabel(mframe2, text="Custom Macro", font=("Calibri", 17))
 mlabel3.grid(row=0, column=0)
 
 mbutton4 = ctk.CTkButton(mframe2, text="Playback Macro",
-                         command=lambda: threading.Thread(target=playback_macro, daemon=True).start())
+                         command=lambda: threading.Thread(target=playback_macro, daemon=True, args=(mspeed.get(),)).start())
 mbutton4.grid(row=2, column=0)
 
 mbutton5 = ctk.CTkButton(mframe2, text="Record Macro - '/' to stop.",
@@ -708,28 +718,34 @@ mbutton7.grid(row=3, column=1)
 mbutton12 = ctk.CTkButton(mframe2, text="Stop Listening", command=stop_start_on)
 mbutton12.grid(row=4, column=0, pady=10)
 
+amlabel4 = ctk.CTkLabel(mframe2, text="Speed:")
+amlabel4.grid(row=5, column=0, pady=10)
+
+mcbox5 = ctk.CTkComboBox(mframe2, values=["1x", "2x", "3x"], state="readonly", variable=mspeed)
+mcbox5.grid(row=5, column=1, padx=10)
+
 mbutton8 = ctk.CTkButton(mframe2, text="Save as slot:", command=save_cmacro)
-mbutton8.grid(row=5, column=0, pady=10)
+mbutton8.grid(row=6, column=0, pady=10)
 
 mcbox2 = ctk.CTkComboBox(mframe2, values=["1 (Empty)", "2 (Empty)", "3 (Empty)"], state="readonly", variable=msaveslot)
-mcbox2.grid(row=5, column=1, padx=10)
+mcbox2.grid(row=6, column=1, padx=10)
 
 mbutton9 = ctk.CTkButton(mframe2, text="Load slot:", command=load_cmacro)
-mbutton9.grid(row=6, column=0, pady=10)
+mbutton9.grid(row=7, column=0, pady=10)
 
 mcbox3 = ctk.CTkComboBox(mframe2, values=["1 (Empty)", "2 (Empty)", "3 (Empty)"], state="readonly", variable=mloadslot)
-mcbox3.grid(row=6, column=1, padx=10)
+mcbox3.grid(row=7, column=1, padx=10)
 
 mbutton10 = ctk.CTkButton(mframe2, text="Clear slot:", command=clear_slot)
-mbutton10.grid(row=7, column=0, pady=10)
+mbutton10.grid(row=8, column=0, pady=10)
 
 mcbox4 = ctk.CTkComboBox(mframe2, values=["1 (Empty)", "2 (Empty)", "3 (Empty)"], state="readonly",
                          variable=mclearslot)
-mcbox4.grid(row=7, column=1, padx=10)
+mcbox4.grid(row=8, column=1, padx=10)
 
 # advanced macro tab
 amlabel = ctk.CTkLabel(tab_admacro, text="Advanced Macro", font=("Calibri", 25))
-amlabel.grid(row=0, column=3, padx=50)
+amlabel.grid(row=0, column=1, padx=50)
 
 amframe = ctk.CTkScrollableFrame(tab_admacro, border_width=2, width=300, height=200)
 amframe.grid(row=1, column=0, pady=10)
@@ -737,8 +753,11 @@ amframe.grid(row=1, column=0, pady=10)
 amframe2 = ctk.CTkFrame(tab_admacro, border_width=2)
 amframe2.grid(row=2, column=0, pady=10)
 
-amlabel2 = ctk.CTkLabel(tab_admacro, textvariable=advmacrovar, font=("Calibri", 14))
-amlabel2.grid(row=1, column=3)
+amframe3 = ctk.CTkScrollableFrame(tab_admacro, border_width=2, width=200, height=200)
+amframe3.grid(row=1, column=1)
+
+amlabel2 = ctk.CTkLabel(amframe3, textvariable=advmacrovar, font=("Calibri", 14))
+amlabel2.grid(row=0, column=0, padx=75)
 
 amlabel3 = ctk.CTkLabel(tab_admacro, text="Controls", font=("Calibri", 25))
 amlabel3.grid(row=0, column=0, pady=10)
